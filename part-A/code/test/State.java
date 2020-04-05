@@ -67,6 +67,12 @@ public class State
         new_position[1] = new_position[1] + move[1];
         int new_position_idx = PosToIdx( new_position , num_columns );
 
+        
+        System.out.println( "move: " + move[0] + " " + move[1] );
+        System.out.println( "new pos: " + new_position[0] + " " + new_position[1] );
+        System.out.println( "new idx: " + new_position_idx );
+
+
         // ektos oriwn
         if ( new_position[0] < 0 || new_position[0] >= num_columns )
         {
@@ -81,6 +87,8 @@ public class State
         // blepei an xtupaei toixo
         if ( this.grid.getCell( new_position[0] , new_position[1] ).isWall() )
         {
+            
+            System.out.println( "wall" );
             return false;
         }
         // exei ksanaepiskeu8ei authn th 8esh
@@ -88,6 +96,9 @@ public class State
         {
             return false;
         }
+        // gia to testarisma paliwn 8esewn
+        // this.old_positions_idx[0] = this.position_idx;
+        // this.position_idx = new_position_idx;
         
 
 
@@ -122,4 +133,63 @@ public class State
     {
         return position[0] * num_columns + position[1];
     }
+
+
+
+    public static void main(String[] args) {
+
+        Grid mygrid = new Grid();
+        State test = new State(mygrid);
+        
+
+/* Testarisma PosToIdx kai IdxToPos */
+        // int my_idx = test.PosToIdx( mygrid.getStart() , mygrid.getNumOfColumns() );
+        // int [] my_pos = new int[2];
+        // my_pos = test.IdxToPos( mygrid.getStartidx() , mygrid.getNumOfColumns() ).clone();
+
+
+        // System.out.println(mygrid.getStart()[0] + " " + mygrid.getStart()[1]);
+        // System.out.println(mygrid.getStartidx());
+        // System.out.println( my_pos[0] + " " + my_pos[1] );
+        // System.out.println( my_idx );
+
+
+/* Testarisma an bgainei apo katw h aristera */
+        // int move_idx = -1;
+        // int [] move = new int[2];
+        // move = test.IdxToPos( move_idx , 10 ).clone();
+
+        // // katw aristera 8esh
+        // test.position_idx = 0;
+        // // paei na bgei ektos
+        // System.out.println( test.IsValidMove(-01) );
+        // System.out.println( test.IsValidMove(-10) );
+
+
+/* Testarisma an bgainei apo panw h deksia */
+        // int [] panw_deksia = new int [2];
+        // panw_deksia[0] = mygrid.getNumOfRows() - 1;
+        // panw_deksia[1] = mygrid.getNumOfColumns() - 1;
+        // test.position_idx = test.PosToIdx( panw_deksia , mygrid.getNumOfColumns() );
+
+        // System.out.println( panw_deksia[0] + " " + panw_deksia[1] );
+        // System.out.println( test.IsValidMove(01) );
+        // System.out.println( test.IsValidMove(10) );
+
+/* Testarisma an mpainei se palia 8esh */
+
+        int [] ekinhsh = new int [2];
+        ekinhsh = mygrid.getStart().clone();
+        
+        System.out.println( "ekinhsh pos: " + ekinhsh[0] + " " + ekinhsh[1] );
+
+        int ekinish_idx = test.PosToIdx( ekinhsh , mygrid.getNumOfColumns());
+        System.out.println( "ekinhsh idx: " + ekinish_idx + "=" + mygrid.getStartidx() );
+
+        System.out.println( test.IsValidMove(01) );
+        System.out.println( test.IsValidMove(-01) );
+
+
+	}	
+
 }
