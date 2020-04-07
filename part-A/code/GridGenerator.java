@@ -55,15 +55,29 @@ class GridGenerator{
 			frame = "default.world";
 		}
 
-
 		int choice = ChooseAlgorithm();
-		// epilish problhmatos
-		int [] steps = CalculateSteps( choice , mygrid );
-
 
 		int N = mygrid.getNumOfRows();
 		int M = mygrid.getNumOfColumns();
 		VisualizeGrid(frame,N,M,mygrid.getWalls(),mygrid.getGrass(),mygrid.getStartidx(),mygrid.getTerminalidx());
+
+		// epilish problhmatos
+		int [] steps = CalculateSteps( choice , mygrid );
+		
+		if( steps == null )
+		{
+			System.out.println("No solution found.");
+			return;
+		}
+
+		// dinw xrono gia to visualize
+		try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+		
+		VisualizeGrid(frame,N,M,mygrid.getWalls(),mygrid.getGrass(), steps ,mygrid.getStartidx(),mygrid.getTerminalidx());
 	}	
 
 
@@ -86,13 +100,13 @@ class GridGenerator{
 
 	private static int[] CalculateSteps( int algorithm , Grid myGrid )
 	{
-		int [] steps;
 		State root = new State( myGrid );
-
+		State goal_state = null;
 		switch ( algorithm )
 		{
 			case 1:
 				System.out.println("BFS");
+				goal_state = root.BFS();
 				break;
 			case 2:
 				System.out.println("DFS");
@@ -104,7 +118,11 @@ class GridGenerator{
 				System.out.println("LRTA*");
 				break;
 		}
+		if( goal_state == null )
+			return null;
 
-		return steps = new int[1];
+		System.out.println( "sunolo katastasewn: " + goal_state.getNum_states() );
+		System.out.println( "kostos monopatiou : " + goal_state.getAccumulated_cost() );
+		return goal_state.ExtractSolution();
 	}
 }

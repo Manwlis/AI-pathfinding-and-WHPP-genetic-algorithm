@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-GridGenerator<code_bc6c116b>",
+            "request": "launch",
+            "mainClass": "GridGenerator",
+            "projectName": "code_bc6c116b"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-State<code_bc6c116b>",
+            "request": "launch",
+            "mainClass": "test.State",
+            "projectName": "code_bc6c116b"
+        }
+    ]
+}
