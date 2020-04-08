@@ -59,6 +59,7 @@ class GridGenerator{
 
 		int N = mygrid.getNumOfRows();
 		int M = mygrid.getNumOfColumns();
+		
 		VisualizeGrid(frame,N,M,mygrid.getWalls(),mygrid.getGrass(),mygrid.getStartidx(),mygrid.getTerminalidx());
 
 		// epilish problhmatos
@@ -110,6 +111,7 @@ class GridGenerator{
 				break;
 			case 2:
 				System.out.println("DFS");
+				goal_state = root.DFS();
 				break;
 			case 3:
 				System.out.println("A*");
@@ -118,10 +120,12 @@ class GridGenerator{
 				System.out.println("LRTA*");
 				break;
 		}
+
+		System.out.println( "sunolo katastasewn: " + root.getNum_states() );
+		
 		if( goal_state == null )
 			return null;
-
-		System.out.println( "sunolo katastasewn: " + goal_state.getNum_states() );
+			
 		System.out.println( "kostos monopatiou : " + goal_state.getAccumulated_cost() );
 		return goal_state.ExtractSolution();
 	}
