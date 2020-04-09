@@ -103,6 +103,14 @@ class GridGenerator{
 	{
 		State root = new State( myGrid );
 		State goal_state = null;
+
+		// an h arxh kai to telos briskontai sthn idia 8esh den exei nohma na treksoun oi algori8moi
+		if ( root.IsGoalState() )
+		{
+			System.out.println("Start is goal!");
+			return null;
+		}
+
 		switch ( algorithm )
 		{
 			case 1:
@@ -115,6 +123,7 @@ class GridGenerator{
 				break;
 			case 3:
 				System.out.println("A*");
+				goal_state = root.Astar();
 				break;
 			case 4:
 				System.out.println("LRTA*");

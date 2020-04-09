@@ -14,13 +14,17 @@ public class State
     private ArrayList<Integer> old_positions_idx; // 8umatai tis pallies 8eseis giati den 8elw na ksanapernaei apo ta idia tetragwna
     
     private int depth; // Deixnei poso ba8u exei ginei to dentro
-    private int accumulated_cost; // kostos mexri stigmhs
+    private int accumulated_cost; // kostos mexri stigmhs. g(n) gia A* kai LRTA*
+    private int expected_cost; // f(n) = g(n) + h(n). Xrhsimopoieitai gia tous algori8mous me heurestics
 
     private static int min_cost_solution = Integer.MAX_VALUE;
     private static int num_states = 1; // ksekinaei apo to 1 gia na pernei ipopsin to root
 
     // krataei to f8hnotero perasma apo ka8e 8esh
     private static int[] pos_min_cost;
+
+    // 8ewrw oti h f8hnoterh kinhsh 8a einai se gh me timh 1.
+    private static int CHEAPEST_MOVE = 1;
     
 
     public static int blocked = 0;
@@ -75,7 +79,21 @@ public class State
         // to kostos tou monopatiou mexri na ftasei se authn th 8esh
         pos_min_cost[ this.position_idx ] = parent.accumulated_cost;
 
-        num_states = num_states + 1;
+        num_states++;
+    }
+
+    // idia 8esh
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( !(obj instanceof State) )
+            return false; 
+        
+        State other = (State) obj;
+        if ( this.position_idx != other.position_idx )
+            return false;
+
+        return true;
     }
 
     public boolean IsGoalState() { return ( grid.getTerminalidx() == this.position_idx ); }
@@ -116,7 +134,7 @@ public class State
             return 0;
         // exei bre8ei f8inoterh lush. Den xreiazetai na sunexistei auto to monopati.
         // +1 giati einai to mikrotero dunato kostos gia mia kinish. Dn bazw to pragmatiko kostos ths kinhshs gia na mporei na xrhsimopoiei8ei ston LRTA*
-        if ( this.accumulated_cost + 1 >= min_cost_solution )
+        if ( this.accumulated_cost + CHEAPEST_MOVE >= min_cost_solution )
             return 0;
         // ena allo monopati exei ftasei se authn th 8esh me f8inotero h iso kostos.
         if ( this.accumulated_cost >= pos_min_cost[ new_position_idx ] )
@@ -160,13 +178,6 @@ public class State
     // xreiazetai allages gia na katalabainei ta kosth.
     public State BFS()
     {
-        // root is goal state
-        if ( this.IsGoalState() )
-        {
-            min_cost_solution = this.accumulated_cost;
-            return this;
-        }
-
         // kataskeuh FIFO ouras. Mpainei h riza.
         LinkedList<State> frontier = new LinkedList<>();
         frontier.add( this );
@@ -201,13 +212,6 @@ public class State
 
     public State DFS()
     {
-        // root is goal state
-        if ( this.IsGoalState() )
-        {
-            min_cost_solution = this.accumulated_cost;
-            return this;
-        }
-
         // kataskeuh stack. Mpainei h riza.
         LinkedList<State> frontier = new LinkedList<>();
         frontier.addFirst( this );
@@ -238,6 +242,68 @@ public class State
         return goal_state;
     }
 
+
+    public State Astar()
+    {
+        LinkedList<State> open_list = new LinkedList<State>();
+        LinkedList<State> closed_list = new LinkedList<State>();
+
+        // bazei to root sthn anoixth lista
+        open_list.add( this );
+
+        while ( !open_list.isEmpty() )
+        {
+            State parent = open_list.remove();
+            closed_list.add( parent );
+
+            // eftase ton stoxo
+            if ( parent.IsGoalState() )
+                return parent;
+
+            // ftiaxnei paidia
+            parent.CreateChildren();
+
+            int num_children =  parent.children.size();
+            for ( int i = 0 ; i < num_children ; i++ )
+            {
+                State child = parent.children.removeFirst();
+
+                // h 8esh einai sthn klisth lista
+                if ( closed_list.contains( child ) )
+                    continue;
+
+                // upologismos expected kostous
+                int heuristic_cost = ManhattanDistance( IdxToPos( child.position_idx , grid.getNumOfColumns() ) , grid.getTerminal() );
+                child.expected_cost = child.accumulated_cost + heuristic_cost;
+
+                int index = open_list.indexOf( child );
+                // h 8esh einai sthn anoixth lista
+                if ( index != -1 )
+                {
+                    // sth lista exei f8inotero monopati ara thn agnow
+                    if ( child.expected_cost > open_list.get( index ).expected_cost )
+                        continue;
+                    else // sth lista exei akribotero monopati kai thn antika8istw
+                        open_list.remove(index);
+                }
+                // mpainei to paidi sthn lista
+                open_list.add( child );
+            }
+        }
+        return null;
+    }
+
+    /*                    heurestic function                    *
+     * Briskei thn manhattan apostash metaksu duo shmeiwn.      *
+     * 8ewrei oti oles oi kiniseis exoun to elaxisto kostos.    *
+     * Ara, den kanei pote overstimate kai einai admissible.    */
+    private static int ManhattanDistance( int [] position , int [] target )
+    {
+        int dx = Math.abs(position[0] + target[0]);
+        int dy = Math.abs(position[1] + target[1]);
+
+        return CHEAPEST_MOVE * (dx + dy);
+    }
 
 
     // epistrefei ena pinaka me indexes pou perigrafoun to monopati ths lhshs
