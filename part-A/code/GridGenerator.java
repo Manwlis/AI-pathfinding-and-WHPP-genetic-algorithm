@@ -127,6 +127,7 @@ class GridGenerator{
 				break;
 			case 4:
 				System.out.println("LRTA*");
+				//goal_state = root.LRTAstar();
 				break;
 		}
 

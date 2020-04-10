@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-// 
+
 public class State 
 {
     private State parent;
@@ -11,7 +11,7 @@ public class State
     private static Grid grid; // Koino gia oles tis katastaseis
     private int position_idx; // 8esh panw sto grid
 
-    private ArrayList<Integer> old_positions_idx; // 8umatai tis pallies 8eseis giati den 8elw na ksanapernaei apo ta idia tetragwna
+    private ArrayList<Integer> old_positions_idx; // 8umatai tis pallies 8eseis giati den 8elw na ksanapernaei apo ta idia tetragwna sto idio monopati
     
     private int depth; // Deixnei poso ba8u exei ginei to dentro
     private int accumulated_cost; // kostos mexri stigmhs. g(n) gia A* kai LRTA*
@@ -25,9 +25,11 @@ public class State
 
     // 8ewrw oti h f8hnoterh kinhsh 8a einai se gh me timh 1.
     private static int CHEAPEST_MOVE = 1;
-    
 
-    public static int blocked = 0;
+    
+    /******************************/
+    /******** Constructors ********/
+    /******************************/
 
     // create root
     public State( Grid my_grid )
@@ -96,10 +98,15 @@ public class State
         return true;
     }
 
+
+    /******************************/
+    /******* Koines me8odoi *******/
+    /******************************/
+
     public boolean IsGoalState() { return ( grid.getTerminalidx() == this.position_idx ); }
 
-
-    /* Elenxei an mia kinhsh einai egkurh. Epistrefei to kostos ths an einai, alliws 0.  */
+    /* Elenxei an mia kinhsh einai egkurh. Epistrefei to kostos ths an einai, alliws 0. * 
+     * Dexetai ws eisodo thn kinhsh kai ton tupo ths anazhthshs.                        */
     private int IsValidMove( int move_idx )
     {
         int num_columns = grid.getNumOfColumns();
@@ -125,8 +132,7 @@ public class State
             return 0;
         if ( new_position[1] < 0 || new_position[1] >= num_columns )
             return 0;
-        // lrta* mporei na to xrhsimopoieisei auto????
-        // blepei an xtupaei toixo
+        // blepei an 8a xtuphsei teixo.
         if ( grid.getCell( new_position[0] , new_position[1] ).isWall() )
             return 0;
         // exei ksanaepiskeu8ei authn th 8esh sto idio monopati
@@ -173,9 +179,11 @@ public class State
         }
     }
 
-
-    // isws ta pia exoun episkeu8ei xreiazetai mono se auton ton algori8mo. Tote na metafer8ei to [] old_positions_idx edw. Den nomizw na isxuei.
-    // xreiazetai allages gia na katalabainei ta kosth.
+    
+    /******************************/
+    /********* Algori8moi *********/
+    /******************************/
+    
     public State BFS()
     {
         // kataskeuh FIFO ouras. Mpainei h riza.
@@ -202,13 +210,13 @@ public class State
                 // an ena monopati exei ftasei sto goal den 8elw na sunexisei. Gia auto den mpainei to state sto frontier
                 else
                 {
+                    // mpainei sthn oura
                     frontier.add( parent.children.removeFirst() );
                 }
             }
         }
         return goal_state;
     }
-
 
     public State DFS()
     {
@@ -235,13 +243,13 @@ public class State
                 }
                 else
                 {
+                    // mpainei sto stack
                     frontier.addFirst( parent.children.removeFirst() );
                 }
             }
         }
         return goal_state;
     }
-
 
     public State Astar()
     {
@@ -306,20 +314,9 @@ public class State
     }
 
 
-    // epistrefei ena pinaka me indexes pou perigrafoun to monopati ths lhshs
-    public int[] ExtractSolution( )
-    {
-        int [] steps = new int[this.depth];
-        State node = this;
-
-        for ( int i = 0 ; i < this.depth ; i++)
-        {
-            steps[ i ] = node.position_idx;
-            node = node.parent;
-        }
-        return steps;
-    }
-
+    /***************************/
+    /***** Utility methods *****/
+    /***************************/
 
     // metatrepei mia 8esh apo morfh idx se morfh [i][j]
     private static int[] IdxToPos( int idx , int num_columns )
@@ -338,6 +335,17 @@ public class State
     public int getNum_states(){ return num_states; }
     public int getAccumulated_cost(){ return accumulated_cost; }
 
-    // gia testarisma optimizations
-    public int getBlocked(){ return blocked; }
+    // epistrefei ena pinaka me indexes pou perigrafoun to monopati ths lhshs
+    public int[] ExtractSolution( )
+    {
+        int [] steps = new int[this.depth];
+        State node = this;
+
+        for ( int i = 0 ; i < this.depth ; i++)
+        {
+            steps[ i ] = node.position_idx;
+            node = node.parent;
+        }
+        return steps;
+    }
 }
