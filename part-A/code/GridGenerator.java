@@ -62,8 +62,12 @@ class GridGenerator{
 		
 		VisualizeGrid(frame,N,M,mygrid.getWalls(),mygrid.getGrass(),mygrid.getStartidx(),mygrid.getTerminalidx());
 
+		int [] steps;
 		// epilish problhmatos
-		int [] steps = CalculateSteps( choice , mygrid );
+		if (choice == 4)
+			steps = CalculateStepsOnline( choice , mygrid );
+		else
+			steps = CalculateStepsOffline( choice , mygrid );
 		
 		if( steps == null )
 		{
@@ -99,10 +103,10 @@ class GridGenerator{
 	}
 
 
-	private static int[] CalculateSteps( int algorithm , Grid myGrid )
+	private static int[] CalculateStepsOffline( int algorithm , Grid myGrid )
 	{
-		State root = new State( myGrid );
-		State goal_state = null;
+		OfflineState root = new OfflineState( myGrid );
+		OfflineState goal_state = null;
 
 		// an h arxh kai to telos briskontai sthn idia 8esh den exei nohma na treksoun oi algori8moi
 		if ( root.IsGoalState() )
@@ -125,10 +129,6 @@ class GridGenerator{
 				System.out.println("A*");
 				goal_state = root.Astar();
 				break;
-			case 4:
-				System.out.println("LRTA*");
-				//goal_state = root.LRTAstar();
-				break;
 		}
 
 		System.out.println( "sunolo katastasewn: " + root.getNum_states() );
@@ -138,5 +138,26 @@ class GridGenerator{
 			
 		System.out.println( "kostos monopatiou : " + goal_state.getAccumulated_cost() );
 		return goal_state.ExtractSolution();
+	}
+
+	private static int[] CalculateStepsOnline( int algorithm , Grid myGrid )
+	{
+		OnlineState root = new OnlineState( myGrid );
+		OnlineState goal_state = null;
+
+		// an h arxh kai to telos briskontai sthn idia 8esh den exei nohma na treksoun oi algori8moi
+		if ( root.IsGoalState() )
+		{
+			System.out.println("Start is goal!");
+			return null;
+		}
+
+		System.out.println("LRTA*");
+		goal_state = root.LRTAstar();
+
+		for( int i = 1 ; i < goal_state.GetPositionsHistory().size() ; i++)
+			System.out.println(goal_state.GetPositionsHistory().get(i));
+
+		return goal_state.GetPositionsHistory().stream().mapToInt( i -> i ).toArray();
 	}
 }
