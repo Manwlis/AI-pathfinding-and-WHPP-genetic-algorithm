@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.awt.Canvas;
 
-import java.io.BufferedReader;
 import java.util.Scanner;
 
 
@@ -155,9 +154,10 @@ class GridGenerator{
 		System.out.println("LRTA*");
 		goal_state = root.LRTAstar();
 
-		for( int i = 1 ; i < goal_state.GetPositionsHistory().size() ; i++)
-			System.out.println(goal_state.GetPositionsHistory().get(i));
+		int cost = goal_state.ExtractPath();
 
+		System.out.println( "kostos monopatiou : " + cost );
+		System.out.println( "Ari8mos kinhsewn  : " + goal_state.getNumMoves() );
 		return goal_state.GetPositionsHistory().stream().mapToInt( i -> i ).toArray();
 	}
 }

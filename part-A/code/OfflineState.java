@@ -131,7 +131,7 @@ public class OfflineState extends State
         if ( this.old_positions_idx.contains( new_position_idx ) )
             return 0;
         // exei bre8ei f8inoterh lush. Den xreiazetai na sunexistei auto to monopati.
-        // +1 giati einai to mikrotero dunato kostos gia mia kinish. Dn bazw to pragmatiko kostos ths kinhshs gia na mporei na xrhsimopoiei8ei ston LRTA*
+        // +1 giati einai to mikrotero dunato kostos gia mia kinish.
         if ( this.accumulated_cost + CHEAPEST_MOVE >= min_cost_solution )
             return 0;
         // ena allo monopati exei ftasei se authn th 8esh me f8inotero h iso kostos.
@@ -250,7 +250,7 @@ public class OfflineState extends State
 
         // bazei to root sthn anoixth lista
         open_list.add( this );
-
+        OfflineState goal_state = null;
         while ( !open_list.isEmpty() )
         {
             OfflineState parent = open_list.remove();
@@ -258,7 +258,12 @@ public class OfflineState extends State
 
             // eftase ton stoxo
             if ( parent.IsGoalState() )
-                return parent;
+            {
+                if ( goal_state == null ) // den exei brei allo stoxo
+                    goal_state = parent;
+                else if ( goal_state.accumulated_cost > parent.accumulated_cost ) // exei brei kalutero
+                    goal_state = parent;
+            }
 
             // ftiaxnei paidia
             parent.CreateChildren();
@@ -290,7 +295,7 @@ public class OfflineState extends State
                 open_list.add( child );
             }
         }
-        return null;
+        return goal_state;
     }
 
 
