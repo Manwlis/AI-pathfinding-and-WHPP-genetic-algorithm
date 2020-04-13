@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 
@@ -8,7 +9,7 @@ public class OfflineState extends State
     private OfflineState parent;
     private LinkedList<OfflineState> children = new LinkedList<>();
 
-    // 8umatai tis pallies 8eseis giati den 8elw na ksanapernaei apo ta idia tetragwna sto idio monopati
+    // 8umatai tis 8eseis twn progonwn tou giati den 8elw na ksanapernaei apo ta idia tetragwna se ena monopati
     private ArrayList<Integer> old_positions_idx; 
     
     private int depth; // Deixnei poso ba8u exei ginei to dentro
@@ -75,20 +76,6 @@ public class OfflineState extends State
         pos_min_cost[ this.position_idx ] = parent.accumulated_cost;
 
         num_states++;
-    }
-
-    // idia 8esh
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( !(obj instanceof OfflineState) )
-            return false; 
-        
-        OfflineState other = (OfflineState) obj;
-        if ( this.position_idx != other.position_idx )
-            return false;
-
-        return true;
     }
 
 
@@ -190,7 +177,7 @@ public class OfflineState extends State
             parent.CreateChildren();
 
             int num_children =  parent.children.size();
-            // elenxw ola ta paidia an einai o stoxos. An einai to epistrefw, alliws mpainoun sto frontier
+            // elenxw ola ta paidia an einai o stoxos. An einai to krataw, alliws mpainoun sto frontier
             for( int i = 0 ; i < num_children ; i++ )
             {
                 if ( parent.children.getFirst().IsGoalState() )
@@ -245,7 +232,9 @@ public class OfflineState extends State
 
     public OfflineState Astar()
     {
+        // krataei ta states pou exoun eksereunh8ei, alla den exoun eksereunh8ei oi geitones tou
         LinkedList<OfflineState> open_list = new LinkedList<OfflineState>();
+        // krataei ta states pou exoun eksereunh8ei, kai den exoun eksereunh8ei oi geitones tou
         LinkedList<OfflineState> closed_list = new LinkedList<OfflineState>();
 
         // bazei to root sthn anoixth lista
@@ -253,8 +242,9 @@ public class OfflineState extends State
         OfflineState goal_state = null;
         while ( !open_list.isEmpty() )
         {
+            // sunexizw to psaksimo apo to pio f8hno
+            open_list.sort( Comparator.comparing(OfflineState::getAccumulated_cost));
             OfflineState parent = open_list.remove();
-            closed_list.add( parent );
 
             // eftase ton stoxo
             if ( parent.IsGoalState() )
@@ -264,12 +254,17 @@ public class OfflineState extends State
                 else if ( goal_state.accumulated_cost > parent.accumulated_cost ) // exei brei kalutero
                     goal_state = parent;
             }
+            else // den bazw sthn klisth lista tous kombous sto terma gia na psaksei f8inoteres luseis
+            {
+                closed_list.add( parent );
+            }
 
             // ftiaxnei paidia
             parent.CreateChildren();
+            parent.children.sort( Comparator.comparing(OfflineState::getAccumulated_cost));
 
             int num_children =  parent.children.size();
-            for ( int i = 0 ; i < num_children ; i++ )
+ child_loop:for ( int i = 0 ; i < num_children ; i++ )
             {
                 OfflineState child = parent.children.removeFirst();
 
@@ -279,17 +274,21 @@ public class OfflineState extends State
 
                 // upologismos expected kostous
                 int heuristic_cost = ManhattanDistance( IdxToPos( child.position_idx , grid.getNumOfColumns() ) , grid.getTerminal() );
-                child.expected_cost = child.accumulated_cost + heuristic_cost;
+                child.expected_cost = child.accumulated_cost - parent.accumulated_cost + heuristic_cost;
 
-                int index = open_list.indexOf( child );
-                // h 8esh einai sthn anoixth lista
-                if ( index != -1 )
+                int k = 0;
+                while( k < open_list.size() )
                 {
-                    // sth lista exei f8inotero monopati ara thn agnow
-                    if ( child.expected_cost > open_list.get( index ).expected_cost )
-                        continue;
-                    else // sth lista exei akribotero monopati kai thn antika8istw
-                        open_list.remove(index);
+                    if ( child.position_idx == open_list.get(k).position_idx )
+                    {
+                        // sth lista exei f8inotero monopati ara thn agnow
+                        if ( child.expected_cost >= open_list.get( k ).expected_cost )
+                            continue child_loop;
+                        else // sth lista exei akribotero monopati kai thn antika8istw
+                            open_list.remove( k );                 
+                    }
+                    else
+                        k++;
                 }
                 // mpainei to paidi sthn lista
                 open_list.add( child );

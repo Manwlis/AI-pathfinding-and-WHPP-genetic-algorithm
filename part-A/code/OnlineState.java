@@ -175,8 +175,16 @@ public class OnlineState extends State
                 continue;
             }
             // an phge se xorta kai den exei ekserevnisei tous ipoloipous geitones paei pisw
-            else if ( first_time == true && grid.getCell( current_pos[0] , current_pos[1] ).isGrass()
+            else if ( grid.getCell( current_pos[0] , current_pos[1] ).isGrass()
                     && !state_map[ old_pos[0] ][ old_pos[1] ].IsFullyExplored( old_pos , valid_actions ) )
+            {
+                current_pos[0] = old_pos[0];
+                current_pos[1] = old_pos[1];
+                current_state = state_map[ current_pos[0] ][ current_pos[1] ];
+                num_moves++;
+                continue;
+            }
+            else if (first_time == true && grid.getCell( current_pos[0] , current_pos[1] ).isGrass())
             {
                 current_pos[0] = old_pos[0];
                 current_pos[1] = old_pos[1];
@@ -227,10 +235,11 @@ public class OnlineState extends State
         return true;
     }
 
-    /* Ka8arizei apo to monopati ta loops. Epishs Epistrefei to kostos tou telikou monopatiou */
+    /* Ka8arizei apo to monopati ta loops kai briskei parakampseis. Epishs Epistrefei to kostos tou telikou monopatiou */
     public int ExtractPath()
     {
-        int i = 0 ;
+        // cut loops
+        int i = 0;
         while (  i < positions_history.size() - 1)
         {
             boolean brhke = false;
@@ -240,6 +249,41 @@ public class OnlineState extends State
                 {
                     brhke = true;
                     positions_history.subList(i,j).clear();
+                }
+            }
+            // afereitai to prwto loop pou ksekinaei apo auto to shmeio. Ksanaelenxetai giati mporei na exei kai alla
+            if ( !brhke )
+                i++;
+        }
+
+        // find bypasses
+        i = 0;
+        while (  i < positions_history.size() - 1)
+        {
+            boolean brhke = false;
+            for ( int j = i + 2 ; j < positions_history.size() - 1 ; j++ )
+            {
+                int [] pos1 = {0,1};
+                int [] pos2 = {1,0};
+                if(positions_history.get(i).intValue() == positions_history.get(j).intValue() + PosToIdx( pos1 , grid.getNumOfColumns() ) )
+                {
+                    brhke = true;
+                    positions_history.subList(i+1,j).clear();
+                }
+                else if (positions_history.get(i).intValue() == positions_history.get(j).intValue() - PosToIdx( pos1 , grid.getNumOfColumns() ) )
+                {
+                    brhke = true;
+                    positions_history.subList(i+1,j).clear();
+                }
+                else if (positions_history.get(i).intValue() == positions_history.get(j).intValue() + PosToIdx( pos2 , grid.getNumOfColumns() ) )
+                {
+                    brhke = true;
+                    positions_history.subList(i+1,j).clear();
+                }
+                else if (positions_history.get(i).intValue() == positions_history.get(j).intValue() - PosToIdx( pos2 , grid.getNumOfColumns() ) )
+                {
+                    brhke = true;
+                    positions_history.subList(i+1,j).clear();
                 }
             }
             // afereitai to prwto loop pou ksekinaei apo auto to shmeio. Ksanaelenxetai giati mporei na exei kai alla
