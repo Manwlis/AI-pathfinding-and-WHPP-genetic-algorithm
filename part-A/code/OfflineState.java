@@ -78,6 +78,17 @@ public class OfflineState extends State
         num_states++;
     }
 
+    // gia to contains sthn Astar
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( !(obj instanceof OfflineState) )
+            return false; 
+        OfflineState other = (OfflineState) obj;
+        if ( this.position_idx != other.position_idx )
+            return false;
+        return true;
+    }
 
     /******************************/
     /******* Koines me8odoi *******/
@@ -117,8 +128,8 @@ public class OfflineState extends State
         // exei ksanaepiskeu8ei authn th 8esh sto idio monopati
         if ( this.old_positions_idx.contains( new_position_idx ) )
             return 0;
-        // exei bre8ei f8inoterh lush. Den xreiazetai na sunexistei auto to monopati.
-        // +1 giati einai to mikrotero dunato kostos gia mia kinish.
+        // exei bre8ei f8inoterh lush. Den xreiazetai na sunexistei auto to monopati.  +1 giati einai to mikrotero dunato kostos gia mia kinish.
+        // 8a mporouse na mpei kai to expected kostos edw ws optimization, alla den 8elw na mplaiksw to heurestic me tous BFS kai DFS algori8mous.
         if ( this.accumulated_cost + CHEAPEST_MOVE >= min_cost_solution )
             return 0;
         // ena allo monopati exei ftasei se authn th 8esh me f8inotero h iso kostos.
@@ -232,9 +243,11 @@ public class OfflineState extends State
 
     public OfflineState Astar()
     {
-        // krataei ta states pou exoun eksereunh8ei, alla den exoun eksereunh8ei oi geitones tou
+        // krataei ta states me 8eseis pou exoun eksereunh8ei, alla den exoun eksereunh8ei oi geitones tou
         LinkedList<OfflineState> open_list = new LinkedList<OfflineState>();
-        // krataei ta states pou exoun eksereunh8ei, kai den exoun eksereunh8ei oi geitones tou
+        // krataei ta states me 8eseis pou exoun eksereunh8ei, kai exoun eksereunh8ei oi geitones tou
+        // Einai redundant stis perissoteres periptwseis logo tou teleutaiou elegxou sthn IsValidMove()
+        // alla gia logous plhrothtas thn afhnw.
         LinkedList<OfflineState> closed_list = new LinkedList<OfflineState>();
 
         // bazei to root sthn anoixth lista
@@ -242,8 +255,8 @@ public class OfflineState extends State
         OfflineState goal_state = null;
         while ( !open_list.isEmpty() )
         {
-            // sunexizw to psaksimo apo to pio f8hno
-            open_list.sort( Comparator.comparing(OfflineState::getAccumulated_cost));
+            // sunexizw to psaksimo apo auto me to mikrotero f(n)
+            open_list.sort( Comparator.comparing(OfflineState::getExpected_cost));
             OfflineState parent = open_list.remove();
 
             // eftase ton stoxo
@@ -261,7 +274,7 @@ public class OfflineState extends State
 
             // ftiaxnei paidia
             parent.CreateChildren();
-            parent.children.sort( Comparator.comparing(OfflineState::getAccumulated_cost));
+            parent.children.sort( Comparator.comparing(OfflineState::getExpected_cost));
 
             int num_children =  parent.children.size();
  child_loop:for ( int i = 0 ; i < num_children ; i++ )
@@ -274,16 +287,17 @@ public class OfflineState extends State
 
                 // upologismos expected kostous
                 int heuristic_cost = ManhattanDistance( IdxToPos( child.position_idx , grid.getNumOfColumns() ) , grid.getTerminal() );
-                child.expected_cost = child.accumulated_cost - parent.accumulated_cost + heuristic_cost;
+                child.expected_cost = child.accumulated_cost + heuristic_cost; // to monopati pros auto + to elaxisto kostos gia ta upoloipa
 
+                // h 8esh einai sthn anoixth lista
                 int k = 0;
                 while( k < open_list.size() )
                 {
                     if ( child.position_idx == open_list.get(k).position_idx )
                     {
                         // sth lista exei f8inotero monopati ara thn agnow
-                        if ( child.expected_cost >= open_list.get( k ).expected_cost )
-                            continue child_loop;
+                        if ( child.accumulated_cost >= open_list.get( k ).accumulated_cost )
+                            continue child_loop; // mporw na bgalw to paidi apo th lista tou patera tou gia kalutero memory managment
                         else // sth lista exei akribotero monopati kai thn antika8istw
                             open_list.remove( k );                 
                     }
@@ -303,9 +317,11 @@ public class OfflineState extends State
     /***************************/
 
     public int getNum_states(){ return num_states; }
+    
+    public int getExpected_cost(){ return expected_cost; }
 
     // epistrefei ena pinaka me indexes pou perigrafoun to monopati ths lhshs
-    public int[] ExtractSolution( )
+    public int[] ExtractSolution()
     {
         int [] steps = new int[this.depth];
         OfflineState node = this;
