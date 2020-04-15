@@ -49,7 +49,6 @@ public class OnlineState extends State
         if (cell_cost > 100000) // band_aid gia integer overflow. To cell cost tou wall einai max_int kai an tou proste8ei kati paei se arnhtikh timh
             cell_cost = 100000;
         
-
         accumulated_cost = cell_cost + previous_cost;
         
         expected_cost = ManhattanDistance( position , grid.getTerminal() );
@@ -165,7 +164,7 @@ public class OnlineState extends State
                 first_time = true;
                 current_state = new OnlineState( current_pos , current_state.accumulated_cost ); // an oxi to ftiaxnei kai pigenei se auto
             }
-            // an phge se toixo gurnaei pisw
+            // an phge se toixo upoxrewtika gurnaei pisw
             if ( grid.getCell( current_pos[0] , current_pos[1] ).isWall() )
             { 
                 current_pos[0] = old_pos[0];
@@ -174,24 +173,18 @@ public class OnlineState extends State
                 num_moves++;
                 continue;
             }
-            // an phge se xorta kai den exei ekserevnisei tous ipoloipous geitones paei pisw
+            // an phge se xorta kai den exei ekserevnisei tous ipoloipous geitones tou dinw kinitro na paei pisw
             else if ( grid.getCell( current_pos[0] , current_pos[1] ).isGrass()
                     && !state_map[ old_pos[0] ][ old_pos[1] ].IsFullyExplored( old_pos , valid_actions ) )
             {
-                current_pos[0] = old_pos[0];
-                current_pos[1] = old_pos[1];
-                current_state = state_map[ current_pos[0] ][ current_pos[1] ];
-                num_moves++;
-                continue;
+                state_map[ old_pos[0] ][ old_pos[1] ].expected_cost -= 5; // voodoo constant. Douleuei kalutera me authn thn timh.
             }
+            // thn prwth fora pou paei se xorta tou dinw kinitro na girisei pisw
             else if (first_time == true && grid.getCell( current_pos[0] , current_pos[1] ).isGrass())
             {
-                current_pos[0] = old_pos[0];
-                current_pos[1] = old_pos[1];
-                current_state = state_map[ current_pos[0] ][ current_pos[1] ];
-                num_moves++;
-                continue;
+                state_map[ old_pos[0] ][ old_pos[1] ].expected_cost -= 5;
             }
+                
             // mpainei h kainourgia 8esh sto istoriko
             positions_history.add( PosToIdx( current_pos , grid.getNumOfColumns() ) );
         }
@@ -257,6 +250,8 @@ public class OnlineState extends State
         }
 
         // find bypasses
+        // estw oti pige: 0 , 1 , 4 , 5 8a to kanei: 0 , 1 , 4 , 5
+        //                - , 2 , 3 , -              - , - , - , -
         i = 0;
         while (  i < positions_history.size() - 1)
         {
@@ -301,4 +296,3 @@ public class OnlineState extends State
         return cost;
     }
 }
-
