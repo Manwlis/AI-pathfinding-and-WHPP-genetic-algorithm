@@ -1,15 +1,19 @@
+
 class WHPP
 {
     public static void main(String[] args)
     {
         // GeneticAlgorithm();
-
+        Population.setStartSize(100); // pop
         Population initial_population = new Population();
 
         System.out.println("Best score:   " + initial_population.getBestScore() );
         System.out.println("Num feasible: " + initial_population.getNumFeasible() );
         System.out.println("Num gen:      " + initial_population.getNumGeneration() );
         System.out.println("Size:         " + initial_population.getSize() );
+
+        initial_population.ExponentialRankSelection();
+        //initial_population.TournamentSelection();
     }
 
 
@@ -29,7 +33,7 @@ class WHPP
 
             for ( int i = 0 ; i < pop.getSize() / 2 ; i++ )
             {
-                Chromosome [] parents = pop.PickChromosomes();                  // epilogh xromosomatwn
+                Chromosome [] parents = pop.ExponentialRankSelection();         // epilogh xromosomatwn
                 Chromosome child = parents[0].CrossingMethod1( parents[1] );    // diastaurwsh kai dhmiourgia neou xrwmosomatos
 
                 child.MutationMethod1();                                        // metalaksh tou

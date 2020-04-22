@@ -28,6 +28,8 @@ public class Chromosome
     private final static int NIGHT = 3;
 
 
+    public int getScore() { return score; }
+
     /*********************************************************/
     /******************** Initialization. ********************/
     /*********************************************************/
