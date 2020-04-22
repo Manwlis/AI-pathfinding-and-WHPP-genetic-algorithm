@@ -96,7 +96,6 @@ public class Population {
 
     /**
      * Epilogh chromosomatwn me ton algori8mo exponential ranking.
-     * https://www.researchgate.net/publication/259461147_Selection_Methods_for_Genetic_Algorithms p.337
      * @return picked_chromosomes[], pinakas chromosomatwn me mege8os NUM_PARENTS
      */
     public Chromosome [] ExponentialRankSelection()
@@ -107,26 +106,33 @@ public class Population {
 
         LinkedList<Chromosome> sorted_chrs = new LinkedList<Chromosome> // topikh lista gia sort kai remove. Den xalaei o plu8hsmos
             ( chr_array.stream().sorted( Comparator.comparing( Chromosome::getScore ).reversed() ).collect(Collectors.toList()) );
+        // reversed wste to xamhlotero score na einai sto telos
 
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
         {
             int size = sorted_chrs.size();
 
-            double c = ( size * 2 * ( size - 1 ) ) / ( 6 * ( size - 1 ) + size ); // interpolation gia na apofugei dunameis me dekadikous??
-
+            double c = 0.99; // oso mikrainei ginetai pio apotomh h klish
+            double cumulative_p = 0;
+            
+            double normalizer = ( c - 1 ) / (Math.pow( c , size ) - 1 ); // kanonikopoiei tis pi8anotites sto pedio 0-1
             double random_value = double_generator.nextDouble();
 
             for ( int i = 0 ; i < size ; i++)
             {
-                double p_i = Math.exp( - i / c );
+                double p_i = Math.pow( c , size - (i + 1) ) * normalizer;
+                cumulative_p += p_i;
 
-                if ( p_i <= random_value )
+                if ( ( cumulative_p - p_i <= random_value ) && ( random_value < cumulative_p ) )
                 {
-                    picked_chromosomes[parent] = sorted_chrs.get(i); 
-                    sorted_chrs.remove(i); // gia na mhn mporei na epileksei ton idio patera polles fores
+                    picked_chromosomes[parent] = sorted_chrs.remove(i); // gia na mhn mporei na epileksei ton idio patera polles fores
                     break;
                 }
             }
+            // Se akraies periptwseis, mporei to cumulative_p na einai mikrotero tou random value
+            // ekseteias la8wn akribeias apo tis prakseis me double. Tote, epilegetai h teleutaia 8esh tou pinaka.
+            if ( picked_chromosomes[parent] == null )
+                picked_chromosomes[parent] = sorted_chrs.removeLast();
         }
         return picked_chromosomes;
     }
