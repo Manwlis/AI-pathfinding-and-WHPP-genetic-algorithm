@@ -2,8 +2,8 @@ import java.util.Random;
 
 public class Chromosome
 {
-    private final static int SCHEDULE_LENGHT = 14; // in days
     private final static int NUM_EMPLOYEES = 30;
+    private final static int SCHEDULE_LENGHT = 14; // in days
 
     private final static int WEEK_DAYS = 7;
     private final static int SCHEDULE_WEEKS = SCHEDULE_LENGHT / WEEK_DAYS; // estw oti ta programmata einai panta se bdomades
@@ -13,6 +13,7 @@ public class Chromosome
     @SuppressWarnings("unused")
     private boolean feasibility = true; // an den xreiazetai na to 8eimatai to katebazw sthn sunarthsh
     private int score;
+    private double fitness;
 
     /* hard constraints */
     private final static int [][] COVERAGE_BOARD = {
@@ -33,11 +34,6 @@ public class Chromosome
     /*********************************************************/
     /******************** Initialization. ********************/
     /*********************************************************/
-
-    Chromosome()
-    {
-        FeasibleRandomInit();
-    }
 
     /**
      * Arxikopoiei ta gonidia tou chromosomatos.
@@ -163,6 +159,8 @@ public class Chromosome
     /* Soft constraints costs. */
     private final static int [] SOFT_CONSTRAINTS_COST = { 1000 , 1000 , 1000 , 1000 , 800 , 800 , 100 , 100 , 1 , 1 , 1 };
     
+    // Ypologizei to ka8e constraint 1 fora gia ka8e ergazomeno.
+    // Gia 1 fora ana programma ta continue ginontai break. Gia polles fores ana ergazomeno feugoun entelws.
     /**
      * Elenxos soft constrains.
      * @return score xromosomatos.
@@ -186,7 +184,7 @@ public class Chromosome
             if ( weekly_workhours > MAX_WORK_HOURS )
             {
                 score += SOFT_CONSTRAINTS_COST[0];
-                break;
+                continue;
             }      
         }
         // max sunexomenes hmeres ergasias
@@ -206,7 +204,7 @@ public class Chromosome
                 if ( seq_work_days > MAX_SEQUENTIAL_WORK_DAYS )
                 {
                     score += SOFT_CONSTRAINTS_COST[1];
-                    break SC1;
+                    continue SC1;
                 }
             }
         }
@@ -227,7 +225,7 @@ public class Chromosome
                 if ( seq_night_shifts > MAX_SEQUENTIAL_NIGHT_SHIFTS )
                 {
                     score += SOFT_CONSTRAINTS_COST[2];
-                    break SC2;
+                    continue SC2;
                 }
             }
         }
@@ -237,7 +235,7 @@ public class Chromosome
                 if ( genes[employee][day] == NIGHT && genes[employee][ day + 1 ] == MORNING )
                 {
                     score += SOFT_CONSTRAINTS_COST[3];
-                    break SC3;
+                    continue SC3;
                 }
         // apogeuma kai meta meshmeri
     SC4:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
@@ -245,7 +243,7 @@ public class Chromosome
                 if ( genes[employee][day] == AFTERNOON && genes[employee][ day + 1 ] == MORNING )
                 {
                     score += SOFT_CONSTRAINTS_COST[4];
-                    break SC4;
+                    continue SC4;
                 }
         // nuxta kai meta apogeuma
     SC5:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
@@ -253,7 +251,7 @@ public class Chromosome
                 if ( genes[employee][day] == NIGHT && genes[employee][ day + 1 ] == AFTERNOON )
                 {
                     score += SOFT_CONSTRAINTS_COST[5];
-                    break SC5;
+                    continue SC5;
                 }
         // meres adeias meta apo nuxterines bardies
     SC6:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
@@ -275,14 +273,14 @@ public class Chromosome
                 else if ( seq_night_shifts > LEAVES_PER_NIGHT_SHIFTS[1] )
                 {
                     score += SOFT_CONSTRAINTS_COST[6];
-                    break SC6;
+                    continue SC6;
                 }
             }
             // teleiwnei to programma me 4 nuxterines xwris 2 adeies ( 8a exei 4 mono an den exei mhdenistei )
             if ( seq_night_shifts == LEAVES_PER_NIGHT_SHIFTS[1] )
             {
                 score += SOFT_CONSTRAINTS_COST[6];
-                break SC6;            
+                continue SC6;            
             }
         }
         // meres adeias meta apo meres ergasias
@@ -305,22 +303,23 @@ public class Chromosome
                 else if ( seq_work_days > LEAVES_PER_WORK_DAYS[1] )
                 {
                     score += SOFT_CONSTRAINTS_COST[7];
-                    break SC7;
+                    continue SC7;
                 }
             }
             if ( seq_work_days == LEAVES_PER_WORK_DAYS[1] )
             {
                 score += SOFT_CONSTRAINTS_COST[7];
-                break SC7;               
+                continue SC7;               
             }
         }
+        // mhpws ta upoloipa na metrane polles fores gia ka8e ergazomeno???
         // ergasia-adeia-ergasia
     SC8:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
             for ( int day = 0 ; day < SCHEDULE_LENGHT - 2 ; day++ )
                 if ( genes[employee][day] != REPO && genes[employee][ day + 1 ] == REPO && genes[employee][ day + 2 ] != REPO )
                 {
                     score += SOFT_CONSTRAINTS_COST[8];
-                    break SC8;
+                    continue SC8;
                 }
         // adeia-ergasia-adeia
     SC9:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
@@ -328,7 +327,7 @@ public class Chromosome
                 if ( genes[employee][day] == REPO && genes[employee][ day + 1 ] != REPO && genes[employee][ day + 2 ] == REPO )
                 {
                     score += SOFT_CONSTRAINTS_COST[9];
-                    break SC9;
+                    continue SC9;
                 }
         // ergasia sabatokuriaka
    SC10:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
@@ -342,10 +341,11 @@ public class Chromosome
                 if ( working_weekends > MAX_WORKING_WEEKENDS )
                 {
                     score += SOFT_CONSTRAINTS_COST[10];
-                    break SC10;
+                    continue SC10;
                 }
             }
         }
+        fitness = score!=0 ? ( 1 / (double) score ) : 1;
         return score;
     }
 
@@ -355,23 +355,64 @@ public class Chromosome
     /*********************************************************/
 
     /**
-     * Zeugarwma 1
+     * Kataskeuazei apogono me tis stules gonidiwn twn gonewn. Egguatai feasibility. Biased ws pros ton gwnea me to kalutero feasibility.
      * @param other ws suntrofos
-     * @return chromosoma paidi
+     * @return {@link Chromosome} paidi
      */
-    public Chromosome CrossingMethod1( final Chromosome other )
+    public Chromosome BiasedCollumnCrosover( final Chromosome other )
     {
-        return null;
+        Chromosome child = new Chromosome();
+
+        // upologizw thn sxetikh diafora twn score twn gonewn. 
+        double relative_fitness = ( this.fitness - other.fitness ) / this.fitness; // range 0 - 1
+
+        // biased crosover point
+        int crossover_point = SCHEDULE_LENGHT/2 + (int) (SCHEDULE_LENGHT/2 * relative_fitness );
+
+        for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
+        {
+            for ( int day = 0 ; day < crossover_point ; day++ )
+                child.genes[employee][day] = this.genes[employee][day];
+
+            for ( int day = crossover_point ; day < SCHEDULE_LENGHT ; day++ )
+                child.genes[employee][day] = other.genes[employee][day];
+        }
+        return child;
     }
 
     /**
-     * Zeugarwma 2
+     * Kataskeuazei apogono me ta gonidia twn gonewn. Polu spania bgazei kati feasible. Unbiased.
      * @param other ws suntrofos
      * @return chromosoma paidi
      */
-    public Chromosome CrossingMethod2( final Chromosome other )
+    public Chromosome UniformCrossing( final Chromosome other )
     {
-        return null;
+        Chromosome child = new Chromosome();
+        Random boolean_generator = new Random();
+
+        for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
+            for ( int day = 0 ; day < SCHEDULE_LENGHT ; day++ )
+                child.genes[employee][day] = boolean_generator.nextBoolean() ? this.genes[employee][day] : other.genes[employee][day] ;
+
+        return child;
+    }
+
+    /**
+     * Kataskeuazei apogono me tis stules gonidiwn twn gonewn. Egguatai feasibility. Unbiased.
+     * @param other ws suntrofos
+     * @return chromosoma paidi
+     */
+    public Chromosome RandomColumnCrossing( final Chromosome other )
+    {
+        Chromosome child = new Chromosome();
+        Random boolean_generator = new Random();
+        for ( int day = 0 ; day < SCHEDULE_LENGHT ; day++ )
+        {
+            boolean parent = boolean_generator.nextBoolean(); // h ka8e gramh dialegetai apo tous goneis tuxaia.
+            for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
+                child.genes[employee][day] = parent ? this.genes[employee][day] : other.genes[employee][day] ;
+        }
+        return child;
     }
 
 

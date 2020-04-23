@@ -33,6 +33,7 @@ public class Population {
         for ( int i = 0 ; i < START_SIZE ; i++ )
         {
             Chromosome chromosome = new Chromosome();
+            chromosome.FeasibleRandomInit();
             chr_array.add( chromosome ); // estw oti ftiaxnontai ola feasible
         }
         num_generation = 1;
@@ -106,7 +107,8 @@ public class Population {
 
         LinkedList<Chromosome> sorted_chrs = new LinkedList<Chromosome> // topikh lista gia sort kai remove. Den xalaei o plu8hsmos
             ( chr_array.stream().sorted( Comparator.comparing( Chromosome::getScore ).reversed() ).collect(Collectors.toList()) );
-        // reversed wste to xamhlotero score na einai sto telos
+        // reversed wste to xamhlotero (best) score na einai sto telos
+
 
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
         {
