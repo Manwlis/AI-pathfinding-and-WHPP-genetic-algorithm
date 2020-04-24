@@ -4,6 +4,7 @@ public class Chromosome
 {
     private final static int NUM_EMPLOYEES = 30;
     private final static int SCHEDULE_LENGHT = 14; // in days
+    private final static int NUM_GENES = NUM_EMPLOYEES * SCHEDULE_LENGHT;
 
     private final static int WEEK_DAYS = 7;
     private final static int SCHEDULE_WEEKS = SCHEDULE_LENGHT / WEEK_DAYS; // estw oti ta programmata einai panta se bdomades
@@ -30,6 +31,7 @@ public class Chromosome
 
 
     public int getScore() { return score; }
+    public static int getNumGenes() { return NUM_GENES; }
 
     /*********************************************************/
     /******************** Initialization. ********************/
@@ -168,6 +170,7 @@ public class Chromosome
     @SuppressWarnings("unused")
     public int CalculateScore()
     {
+        score = 0;
         // max wres ergasias
     SC0:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
         {
@@ -355,11 +358,11 @@ public class Chromosome
     /*********************************************************/
 
     /**
-     * Kataskeuazei apogono me tis stules gonidiwn twn gonewn. Egguatai feasibility. Biased ws pros ton gwnea me to kalutero feasibility.
+     * Kataskeuazei apogono me tis stules gonidiwn twn gonewn. Egguatai feasibility. Biased ws pros ton gonea me to kalutero feasibility.
      * @param other ws suntrofos
      * @return {@link Chromosome} paidi
      */
-    public Chromosome BiasedCollumnCrosover( final Chromosome other )
+    public Chromosome MeritCollumnCrosover( final Chromosome other )
     {
         Chromosome child = new Chromosome();
 
@@ -381,36 +384,57 @@ public class Chromosome
     }
 
     /**
-     * Kataskeuazei apogono me ta gonidia twn gonewn. Polu spania bgazei kati feasible. Unbiased.
+     * Kataskeuazei apogono me ta gonidia twn gonewn. Polu spania bgazei kati feasible. Biased analoga to pcross.
      * @param other ws suntrofos
+     * @param pcross h pi8anothta na perasei gonidio apo ton kalutero gonea.
      * @return chromosoma paidi
      */
-    public Chromosome UniformCrossing( final Chromosome other )
+    public Chromosome UniformCrossing( final Chromosome other , double pcross )
     {
+        // briskw pio einai to kalutero kai tou dinw to bias. To bias einai to orio gia thn epilogh gonidiou gonea.
+        // Anebazontas to, pernaei pio eukola h mana, enw meionontas to pernaei pio eukola o pateras.
+        double bias;
+        if ( this.fitness > other.fitness )
+            bias = pcross;
+        else
+            bias = 1 - pcross;
+        
         Chromosome child = new Chromosome();
-        Random boolean_generator = new Random();
+        Random double_generator = new Random();
 
+        // tuxaia epilogh gia ka8e gonidio
         for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
             for ( int day = 0 ; day < SCHEDULE_LENGHT ; day++ )
-                child.genes[employee][day] = boolean_generator.nextBoolean() ? this.genes[employee][day] : other.genes[employee][day] ;
+                child.genes[employee][day] = double_generator.nextDouble() < bias ? this.genes[employee][day] : other.genes[employee][day] ;
 
         return child;
     }
 
     /**
-     * Kataskeuazei apogono me tis stules gonidiwn twn gonewn. Egguatai feasibility. Unbiased.
-     * @param other ws suntrofos
+     * Kataskeuazei apogono me tis stules gonidiwn twn gonewn. Egguatai feasibility. Biased analoga to pcross.
+     * @param other ws suntrofos.
+     * @param pcross h pi8anothta na perasei sthlh apo ton kalutero gonea.
      * @return chromosoma paidi
      */
-    public Chromosome RandomColumnCrossing( final Chromosome other )
+    public Chromosome RandomColumnCrossing( final Chromosome other , double pcross )
     {
+        // briskw pio einai to kalutero kai tou dinw to bias. To bias einai to orio gia thn epilogh gonidiou gonea.
+        // Anebazontas to, pernaei pio eukola h mana, enw meionontas to pernaei pio eukola o pateras.
+        double bias;
+        if ( this.fitness > other.fitness )
+            bias = pcross;
+        else
+            bias = 1 - pcross;
+
         Chromosome child = new Chromosome();
-        Random boolean_generator = new Random();
+        Random double_generator = new Random();
+
+        // tuxaia epilogh gia ka8e stulh gonidiwn
         for ( int day = 0 ; day < SCHEDULE_LENGHT ; day++ )
         {
-            boolean parent = boolean_generator.nextBoolean(); // h ka8e gramh dialegetai apo tous goneis tuxaia.
+            double parent = double_generator.nextDouble();
             for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
-                child.genes[employee][day] = parent ? this.genes[employee][day] : other.genes[employee][day] ;
+                child.genes[employee][day] = parent < bias ? this.genes[employee][day] : other.genes[employee][day] ;
         }
         return child;
     }
@@ -421,20 +445,67 @@ public class Chromosome
     /*********************************************************/
 
     /**
-     * Metalaksh 1.
-     * Metalazei to chromosoma pou thn kalei
+     * Antistrefei tuxaio kommati mia tuxaias sthlhs (meras). Egguatai feasibility.
+     * @param pmut h ph8anothta na ginei invert 1 gonidio. num_inverted_genes = pmut * num_genes
      */
-    public void MutationMethod1()
+    public void ColumnInversionMutation( double pmut )
     {
+        // posa gonidia 8a ginoun invert.
+        int remaining_mutations = (int) Math.round( pmut * (double) NUM_GENES );
 
+        Random int_generator = new Random();
+
+        // invert stules mexri na ginoun osa prepei
+        while ( remaining_mutations > 0 )
+        {
+            // generate random 8eseis se random meres
+            int day = int_generator.nextInt( SCHEDULE_LENGHT ); 
+            int inversion_start_point = int_generator.nextInt( NUM_EMPLOYEES );
+            int inversion_end_point = int_generator.nextInt( NUM_EMPLOYEES - inversion_start_point ) + inversion_start_point;
+            
+            // Invert apo to meso ths sthlhs pros ta eksw. An ginei break 8a exei ginei invert se mia mikroterh uposthlh ths
+            for ( int employee = (inversion_end_point - inversion_start_point + 1)/2 - 1 ; employee >= 0  ; employee-- )
+            {
+                int temp = genes[ inversion_start_point + employee ][day];
+                genes[ inversion_start_point + employee ][day] = genes[ inversion_end_point - employee ][day];
+                genes[ inversion_end_point - employee ][day] = temp;
+
+                remaining_mutations -= 2; // Ginan 2 gonidia invert.
+                if ( remaining_mutations <= 0 )
+                    break; // den xreiazetai alla
+            }
+        }
     }
 
     /**
-     * Metalaksh 1.
-     * Metalazei to chromosoma pou thn kalei
+     * Swaps 2 tuxaia gonidia. Den egguatai feasiblity
+     * @param pmut h ph8anothta na swap invert 1 gonidio. num_swapped_genes = pmut * num_genes
      */
-    public void MutationMethod2()
+    public void SwapMutation( double pmut )
     {
+        // posa gonidia 8a ginoun swap.
+        int remaining_mutations = (int) Math.round( pmut * (double) NUM_GENES );
+        //remaining_mutations = 2;
+        Random int_generator = new Random();
 
+        int [] pos1 = new int [2];
+        int [] pos2 = new int [2];
+        while ( remaining_mutations > 0 )
+        {
+            // epilogh tuxaiwn 8esewn
+            pos1[0] = int_generator.nextInt(NUM_EMPLOYEES);
+            pos1[1] = int_generator.nextInt(SCHEDULE_LENGHT);
+            pos2[0] = int_generator.nextInt(NUM_EMPLOYEES);
+            pos2[1] = int_generator.nextInt(SCHEDULE_LENGHT);
+
+            // swap
+            int temp = genes[ pos1[0] ][ pos1[1] ];
+            genes[ pos1[0] ][ pos1[1] ] = genes[ pos2[0] ][ pos2[1] ];
+            genes[ pos2[0] ][ pos2[1] ] = temp;
+
+            remaining_mutations -= 2; // Ginan 2 gonidia swap.
+            if ( remaining_mutations <= 0 )
+                break; // den xreiazetai alla         
+        }
     }
 }

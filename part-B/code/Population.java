@@ -97,9 +97,12 @@ public class Population {
 
     /**
      * Epilogh chromosomatwn me ton algori8mo exponential ranking.
+     * @param psel orizei thn klish ths ek8etikhs sunarthshs katanomhs.
+     * Gia megalo psel, h klish ginetai pio omalh kai uparxoun perissoteres pi8anothtes na epilex8ei ena xromosoma me xamhlotero rank.
+     * Gia mikro psel, ta xrwmosomata me kalutero rank, sugkentrwnoun tis perissoteres pi8anothtes epiloghs.
      * @return picked_chromosomes[], pinakas chromosomatwn me mege8os NUM_PARENTS
      */
-    public Chromosome [] ExponentialRankSelection()
+    public Chromosome [] ExponentialRankSelection( double c )
     {
         Chromosome [] picked_chromosomes = new Chromosome[NUM_PARENTS];
         
@@ -109,12 +112,11 @@ public class Population {
             ( chr_array.stream().sorted( Comparator.comparing( Chromosome::getScore ).reversed() ).collect(Collectors.toList()) );
         // reversed wste to xamhlotero (best) score na einai sto telos
 
-
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
         {
             int size = sorted_chrs.size();
 
-            double c = 0.99; // oso mikrainei ginetai pio apotomh h klish
+            //double c = 0.99; // oso mikrainei ginetai pio apotomh h klish
             double cumulative_p = 0;
             
             double normalizer = ( c - 1 ) / (Math.pow( c , size ) - 1 ); // kanonikopoiei tis pi8anotites sto pedio 0-1
@@ -139,27 +141,29 @@ public class Population {
         return picked_chromosomes;
     }
 
-    final static int TOURNAMENT_SIZE = 5; // size / psel
     /**
      * Epilogh chromosomatwn me ton algori8mo tournament. Mege8os tournament metablhto.
+     * @param psel h pi8anothta na epilex8ei ena xrwmosoma gia na mpei sto tournament.
      * @return picked_chromosomes[], pinakas chromosomatwn me mege8os NUM_PARENTS
      */
-    public Chromosome [] TournamentSelection()
+    public Chromosome [] TournamentSelection( double psel )
     {
+        //
+        int tournament_size = (int) Math.round( (double) chr_array.size() * psel );
+        
         Chromosome [] picked_chromosomes = new Chromosome[NUM_PARENTS];
         int [] picked_index = new int[NUM_PARENTS]; // gia na ta ksanabgalw pisw
-
 
         Random int_generator = new Random();
 
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
         {
             // Dialegw mia tuxaia dekada. Ta chromosomata einai se tuxaia seira mesa ston plu8usmo.
-            int random_index = int_generator.nextInt( chr_array.size() - TOURNAMENT_SIZE + 1 );
+            int random_index = int_generator.nextInt( chr_array.size() - tournament_size + 1 );
 
             // krataw to kalutero apo thn dekada
             int min_score = Integer.MAX_VALUE;
-            for ( int i = 0 ; i < TOURNAMENT_SIZE ; i++ )
+            for ( int i = 0 ; i < tournament_size ; i++ )
             {
                 if ( chr_array.get( random_index + i).getScore() < min_score )
                 {

@@ -1,11 +1,14 @@
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public class test {
 
     public Chromosome CollumnCrosoverTest( final Chromosome other )
     {
-        Chromosome child = CollumnCrosover(other);
+        Chromosome child = RandomColumnCrossing(other , 0.9);
         child.CalculateScore();
-        System.out.println( this.fitness + "   " + other.fitness + "   " + child.fitness );
+        NumberFormat formatter = new DecimalFormat("#0.0000000");  
+        System.out.println( formatter.format(this.fitness) + "   " + formatter.format(other.fitness) + "   " + formatter.format(child.fitness) );
 
         for ( int column = 0 ; column < SCHEDULE_LENGHT ; column++ )
         {
