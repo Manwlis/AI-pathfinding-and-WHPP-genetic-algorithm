@@ -11,7 +11,6 @@ public class Chromosome
 
     public int [][] genes = new int  [ NUM_EMPLOYEES ] [ SCHEDULE_LENGHT ];
 
-    @SuppressWarnings("unused")
     private boolean feasibility = true; // an den xreiazetai na to 8eimatai to katebazw sthn sunarthsh
     private int score;
     private double fitness;
@@ -31,6 +30,7 @@ public class Chromosome
 
 
     public int getScore() { return score; }
+    public boolean getFeasibility() { return feasibility; }
     public static int getNumGenes() { return NUM_GENES; }
 
     /*********************************************************/
@@ -441,7 +441,7 @@ public class Chromosome
 
 
     /*********************************************************/
-    /********************** Melaksaseis. *********************/
+    /********************** Metalakseis. *********************/
     /*********************************************************/
 
     /**

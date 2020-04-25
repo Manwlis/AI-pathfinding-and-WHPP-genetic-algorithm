@@ -7,26 +7,29 @@ import java.util.stream.Collectors;
 public class Population {
 
     private static int START_SIZE;
+    private static int ITER_MAX;
     private ArrayList<Chromosome> chr_array = new ArrayList<Chromosome>(); // array, arraylist h list?
 
     private int num_generation;
     private int num_feasible = 0;
-    private int best_score = Integer.MAX_VALUE;
+
+    private Chromosome best_chromosome;
 
 
     public int getSize() { return chr_array.size(); }
     public int getNumGeneration() { return num_generation; }
     public int getNumFeasible() { return num_feasible; }
-    public int getBestScore() { return best_score; }
+    public Chromosome getBestChromosome() { return best_chromosome; }
 
     public static void setStartSize( int size ) { START_SIZE = size; }
+    public static void setIterMax( int iter ) { ITER_MAX = iter; }
 
     /*********************************************************/
     /******************** Initialization. ********************/
     /*********************************************************/
 
     /**
-     * Kataskeuh prwths genias
+     * Kataskeuh prwths genias.
      */
     public Population()
     {
@@ -34,21 +37,18 @@ public class Population {
         {
             Chromosome chromosome = new Chromosome();
             chromosome.FeasibleRandomInit();
-            chr_array.add( chromosome ); // estw oti ftiaxnontai ola feasible
+            AddChromosome(chromosome);
         }
         num_generation = 1;
-        num_feasible = START_SIZE;
-
-        CalculateScore();
     }
 
     /**
      * Kataskeuh neas genias.
-     * @param parent_num_gen to plh8os twn genewn mexri twra
+     * @param parent_num_gen to plh8os twn genewn mexri twra.
      */
     public Population( int parent_num_gen )
     {
-        num_generation = parent_num_gen++;
+        num_generation = parent_num_gen + 1;
     }
 
     /**
@@ -58,35 +58,21 @@ public class Population {
     public void AddChromosome ( Chromosome chromosome )
     {
         chr_array.add( chromosome );
-    }
 
+        // mpainoun mono feasible
+        num_feasible++;
 
-    /*********************************************************/
-    /********************** Constrains. **********************/
-    /*********************************************************/
-
-    /**
-     * Elenxei ola ta chromosomata an einai feasible. Isws den xreiazetai an ola einai feasible, na dw meta to mutation
-     */
-    public void CheckFeasibility()
-    {
-        for ( Chromosome chromosome : chr_array )
-            if ( chromosome.IsFeasible() )
-                num_feasible++;
-    }
-
-    /**
-     * upologizei to kostos olwn twn chromosomatwn ths genias. Mallon den xreiazetai. Na dw meta to mutation.
-     */
-    public void CalculateScore()
-    {
-        for ( Chromosome chromosome : chr_array )
+        int best_score = Integer.MAX_VALUE;
+        // briskei pio einai to kalutero chromosoma
+        int chromosome_score = chromosome.CalculateScore();
+        if ( chromosome_score < best_score )
         {
-            int chr_cost = chromosome.CalculateScore();
-            if ( chr_cost < best_score )
-                best_score = chr_cost;
+            best_score = chromosome_score;
+            best_chromosome = chromosome;
         }
     }
+
+
 
 
     /*********************************************************/
@@ -152,7 +138,6 @@ public class Population {
         int tournament_size = (int) Math.round( (double) chr_array.size() * psel );
         
         Chromosome [] picked_chromosomes = new Chromosome[NUM_PARENTS];
-        int [] picked_index = new int[NUM_PARENTS]; // gia na ta ksanabgalw pisw
 
         Random int_generator = new Random();
 
@@ -168,7 +153,6 @@ public class Population {
                 if ( chr_array.get( random_index + i).getScore() < min_score )
                 {
                     picked_chromosomes[parent] = chr_array.get( random_index + i);
-                    picked_index[parent] = random_index + i;
                     min_score = picked_chromosomes[parent].getScore();
                 }
             }
@@ -178,19 +162,36 @@ public class Population {
         
         // ta ksanabazw ston plu8hsmo. Den exei shmasia pou, htan idh se tuxaia 8esh.
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
-            chr_array.add( picked_index[parent] , picked_chromosomes[parent] );
+            chr_array.add( int_generator.nextInt( chr_array.size() ) , picked_chromosomes[parent] );
 
         return picked_chromosomes;
     }
 
 
-
+    private static int times = 0;
     /**
      * Deixnei an o plh8usmos eikanopoiei ta krhtiria termatismou
      * @return true/false
      */
-    public boolean IsTerminationValid()
+    public boolean IsTerminationValid( int previous_best_score )
     {
+        // bre8hke beltisth lush
+        if ( best_chromosome.getScore() == 0 )
+        {
+            return true;
+        }
+        // ekane maximum epanalhpseis
+        if ( num_generation == ITER_MAX )
+            return true;
+
+        if ( best_chromosome.getScore() - previous_best_score < 0.01 *previous_best_score )
+            times++;
+        else
+            times = 0;
+
+        if ( times == ITER_MAX/10 )
+            return true;
+
         return false;
     }
 }

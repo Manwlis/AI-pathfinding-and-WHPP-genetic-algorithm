@@ -2,72 +2,56 @@ import java.util.Arrays;
 
 class WHPP
 {
+    final static int pop = 1000;
+    final static int iter_max = 1000;
+    final static double psel = 0.5;
+    final static double pcross = 0.5;
+    final static double pmut = 0.03;
+
     public static void main(String[] args)
     {
-        // GeneticAlgorithm();
+        Population.setStartSize(pop);
+        Population.setIterMax(iter_max);
+    
+        Chromosome best_chr = GeneticAlgorithm();
 
-        // Population initial_population = new Population();
-
-        // System.out.println("Best score:   " + initial_population.getBestScore() );
-        // System.out.println("Num feasible: " + initial_population.getNumFeasible() );
-        // System.out.println("Num gen:      " + initial_population.getNumGeneration() );
-        // System.out.println("Size:         " + initial_population.getSize() );
-
-        // initial_population.ExponentialRankSelection();
-        // initial_population.TournamentSelection(0.2);
-
-        Population.setStartSize(100);
-        Population pop = new Population();
-        Chromosome [] parents = pop.TournamentSelection(0.2);
-
-        Chromosome father = parents[0];
-        father.CalculateScore();
-        Chromosome mother = parents[1];
-        mother.CalculateScore();
-
-        Chromosome child = mother.RandomColumnCrossing( father , 0.5 );
-        child.SwapMutation(0.01);
-
-        System.out.println("child:    " + child.IsFeasible() + "   " + child.CalculateScore());
-        System.out.println( " " + Arrays.deepToString( child.genes ).replace("],","\n").replace("[","").replace(",","").replace("]","") );
-
-        // child.ColumnInversionMutation( 0.1d );
-
-        // System.out.println("father:   " + father.IsFeasible() + "   " + father.CalculateScore());
-        // System.out.println( " " + Arrays.deepToString( father.genes ).replace("],","\n").replace("[","").replace(",","").replace("]","") );
-        
-        // System.out.println("mother:   " + mother.IsFeasible() + "   " + mother.CalculateScore());
-        // System.out.println( " " + Arrays.deepToString( mother.genes ).replace("],","\n").replace("[","").replace(",","").replace("]","") );
+        System.out.println("\n" + best_chr.getScore() );
     }
 
 
     /* Skeletos genetikou algori8mou */
-    public static void GeneticAlgorithm()
+    public static Chromosome GeneticAlgorithm()
     {
         Population pop = new Population();
-
+        System.out.println( pop.getBestChromosome().getScore() );
         boolean completed = false;
-
-        pop.CheckFeasibility();
-        pop.CalculateScore();
 
         while ( !completed )
         {
             Population next_pop =  new Population( pop.getNumGeneration() );
 
-            for ( int i = 0 ; i < pop.getSize() / 2 ; i++ )
+            while ( next_pop.getSize() < pop.getSize() )
             {
-                Chromosome [] parents = pop.ExponentialRankSelection( 0.99 );         // epilogh xromosomatwn
-                Chromosome child = parents[0].MeritCollumnCrosover( parents[1] );    // diastaurwsh kai dhmiourgia neou xrwmosomatos
+                Chromosome [] parents = pop.TournamentSelection( psel );                    // epilogh xromosomatwn
+                Chromosome child = parents[0].RandomColumnCrossing( parents[1] , pcross );  // diastaurwsh kai dhmiourgia neou xrwmosomatos
+                //Chromosome child = parents[0].MeritCollumnCrosover( parents[1] );  // diastaurwsh kai dhmiourgia neou xrwmosomatos
 
-                child.ColumnInversionMutation( 0.01d );                                        // metalaksh tou
+                child.ColumnInversionMutation( pmut );                                      // metalaksh tou
                 
-                child.IsFeasible();                                             // elenxos sunepeias
-                next_pop.AddChromosome( child );                                // eisagwgh sth nea genia
+                if ( child.IsFeasible() )                                                  // elenxos sunepeias
+                    next_pop.AddChromosome( child );                                        // eisagwgh sth nea genia 
             }
 
-            if ( next_pop.IsTerminationValid() )
+            if ( next_pop.IsTerminationValid( pop.getBestChromosome().getScore() ) )
                 completed = true;
+            
+            pop = next_pop;
+
+            System.out.print(" " + pop.getNumGeneration());
         }
+        System.out.println("\n" + pop.getBestChromosome().IsFeasible() + "   " + pop.getBestChromosome().getScore() );
+        System.out.println( " " + Arrays.deepToString( pop.getBestChromosome().genes ).replace("],","\n").replace("[","").replace(",","").replace("]","") );
+            
+        return pop.getBestChromosome();
     } 
 }
