@@ -478,8 +478,8 @@ public class Chromosome
     }
 
     /**
-     * Swaps 2 tuxaia gonidia. Den egguatai feasiblity
-     * @param pmut h ph8anothta na swap invert 1 gonidio. num_swapped_genes = pmut * num_genes
+     * Swaps 2 tuxaia gonidia sthn idia sthlh. Egguatai feasiblity
+     * @param pmut h ph8anothta na ginei swap 1 gonidio. num_swapped_genes = pmut * num_genes
      */
     public void SwapMutation( double pmut )
     {
@@ -488,20 +488,17 @@ public class Chromosome
         //remaining_mutations = 2;
         Random int_generator = new Random();
 
-        int [] pos1 = new int [2];
-        int [] pos2 = new int [2];
         while ( remaining_mutations > 0 )
         {
             // epilogh tuxaiwn 8esewn
-            pos1[0] = int_generator.nextInt(NUM_EMPLOYEES);
-            pos1[1] = int_generator.nextInt(SCHEDULE_LENGHT);
-            pos2[0] = int_generator.nextInt(NUM_EMPLOYEES);
-            pos2[1] = int_generator.nextInt(SCHEDULE_LENGHT);
+            int pos1 = int_generator.nextInt(NUM_EMPLOYEES);
+            int pos2 = int_generator.nextInt(NUM_EMPLOYEES);
+            int day = int_generator.nextInt(SCHEDULE_LENGHT);
 
             // swap
-            int temp = genes[ pos1[0] ][ pos1[1] ];
-            genes[ pos1[0] ][ pos1[1] ] = genes[ pos2[0] ][ pos2[1] ];
-            genes[ pos2[0] ][ pos2[1] ] = temp;
+            int temp = genes[ pos1 ][ day ];
+            genes[ pos1 ][ day ] = genes[ pos2 ][ day ];
+            genes[ pos2 ][ day ] = temp;
 
             remaining_mutations -= 2; // Ginan 2 gonidia swap.
             if ( remaining_mutations <= 0 )

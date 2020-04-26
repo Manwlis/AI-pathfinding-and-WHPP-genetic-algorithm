@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -8,13 +7,13 @@ public class Population {
 
     private static int START_SIZE;
     private static int ITER_MAX;
-    private ArrayList<Chromosome> chr_array = new ArrayList<Chromosome>(); // array, arraylist h list?
+    private LinkedList<Chromosome> chr_array = new LinkedList<Chromosome>(); // array, arraylist h list?
 
     private int num_generation;
     private int num_feasible = 0;
 
     private Chromosome best_chromosome;
-
+    private static int [] population_best_score = new int[ ITER_MAX ];
 
     public int getSize() { return chr_array.size(); }
     public int getNumGeneration() { return num_generation; }
@@ -22,7 +21,7 @@ public class Population {
     public Chromosome getBestChromosome() { return best_chromosome; }
 
     public static void setStartSize( int size ) { START_SIZE = size; }
-    public static void setIterMax( int iter ) { ITER_MAX = iter; }
+    public static void setIterMax( int iter ) { ITER_MAX = iter; population_best_score = new int[ ITER_MAX ]; }
 
     /*********************************************************/
     /******************** Initialization. ********************/
@@ -39,7 +38,7 @@ public class Population {
             chromosome.FeasibleRandomInit();
             AddChromosome(chromosome);
         }
-        num_generation = 1;
+        num_generation = 0;
     }
 
     /**
@@ -78,7 +77,7 @@ public class Population {
     /*********************************************************/
     /******************** Epilogh gonewn. ********************/
     /*********************************************************/
-    // Leitourgoun kai me diaforetiko plh8os gonewn
+    // Leitourgoun kai me diaforetiko plh8os gonewn.
     private final static int NUM_PARENTS = 2;
 
     /**
@@ -134,41 +133,50 @@ public class Population {
      */
     public Chromosome [] TournamentSelection( double psel )
     {
-        //
+        // To psel orizei thn pi8anothta ena xrwmoswma na labei meros se ena tournament.
         int tournament_size = (int) Math.round( (double) chr_array.size() * psel );
         
         Chromosome [] picked_chromosomes = new Chromosome[NUM_PARENTS];
 
+        LinkedList<Chromosome> competitors = new LinkedList<Chromosome>();
+
         Random int_generator = new Random();
 
+        // Epanalambanetai gia osous goneis xreiazomai.
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
         {
-            // Dialegw mia tuxaia dekada. Ta chromosomata einai se tuxaia seira mesa ston plu8usmo.
-            int random_index = int_generator.nextInt( chr_array.size() - tournament_size + 1 );
-
             // krataw to kalutero apo thn dekada
             int min_score = Integer.MAX_VALUE;
+
             for ( int i = 0 ; i < tournament_size ; i++ )
             {
-                if ( chr_array.get( random_index + i).getScore() < min_score )
+                // Dialegw tuxaia chromosomata. Ta bgazw prosorina apo ton plu8usmo gia na mhn ta ksanadw sto idio tournament
+                int random_index = int_generator.nextInt( chr_array.size() - tournament_size + 1 );
+                competitors.add( chr_array.remove( random_index ) );
+
+                // briskw to kalutero
+                if ( competitors.get(i).getScore() < min_score )
                 {
-                    picked_chromosomes[parent] = chr_array.get( random_index + i);
+                    picked_chromosomes[parent] = competitors.get(i);
                     min_score = picked_chromosomes[parent].getScore();
                 }
             }
-            // bgazw proswrina auta pou dialextikan apo ton plu8ismo gia na mhn ksanadialextoun
-            chr_array.remove(picked_chromosomes[parent]);
-        }
-        
-        // ta ksanabazw ston plu8hsmo. Den exei shmasia pou, htan idh se tuxaia 8esh.
+            // Ksanabazw mesa tous competitors gia na mporoun na paroun meros se allo tournament.
+            // Den exei shmasia pou, afou dialegontai tuxaia.
+            while ( competitors.size() > 0 )
+                chr_array.add( competitors.remove() );
+            
+            // menei eksw autos pou nikise gia na mhn ginei goneas panw apo 1 fora.
+            chr_array.remove( picked_chromosomes[parent] );
+        }      
+        //Ksanabazw tous goneis ston plu8hsmo. Den exei shmasia pou.
         for ( int parent = 0 ; parent < NUM_PARENTS ; parent++ )
-            chr_array.add( int_generator.nextInt( chr_array.size() ) , picked_chromosomes[parent] );
+            chr_array.add( picked_chromosomes[parent] );
 
         return picked_chromosomes;
     }
 
 
-    private static int times = 0;
     /**
      * Deixnei an o plh8usmos eikanopoiei ta krhtiria termatismou
      * @return true/false
@@ -184,13 +192,22 @@ public class Population {
         if ( num_generation == ITER_MAX )
             return true;
 
-        if ( best_chromosome.getScore() - previous_best_score < 0.01 *previous_best_score )
-            times++;
-        else
-            times = 0;
+        // population_best_score[ num_generation ] = best_chromosome.getScore();
+        // if ( num_generation >= ITER_MAX / 10 )
+        // {
+        //     int old_score = population_best_score[ num_generation - (ITER_MAX / 10) ];
+        //     // An den exei uparxei sumantikh beltiwsh (>1%) gia to 10% tou algori8mou, exei meinei se topiko akrotato.
+        //     // H deuterh anisothta uparxei gia na apofeigw periptwseis opou to score xeiroterpse kai plhsiase ta palia, enw den isxuei gia ta gurw tou.
+        //     if ( ( old_score - best_chromosome.getScore() < old_score / 500 )
+        //       && ( best_chromosome.getScore() < population_best_score[ num_generation - 1 ] ) )
+        //       {
+        //           int x = old_score - best_chromosome.getScore();
+        //           int y = old_score / 500;
+        //           System.out.println(old_score + "   " +  best_chromosome.getScore() + "   " + x + "   " + y );
+        //             return true;
+        //       }
+        // }
 
-        if ( times == ITER_MAX/10 )
-            return true;
 
         return false;
     }

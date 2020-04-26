@@ -2,11 +2,11 @@ import java.util.Arrays;
 
 class WHPP
 {
-    final static int pop = 1000;
+    final static int pop = 3000;
     final static int iter_max = 1000;
-    final static double psel = 0.5;
-    final static double pcross = 0.5;
-    final static double pmut = 0.03;
+    final static double psel = 0.005;
+    final static double pcross = 0.55;
+    final static double pmut = 0.015;
 
     public static void main(String[] args)
     {
@@ -34,11 +34,12 @@ class WHPP
             {
                 Chromosome [] parents = pop.TournamentSelection( psel );                    // epilogh xromosomatwn
                 Chromosome child = parents[0].RandomColumnCrossing( parents[1] , pcross );  // diastaurwsh kai dhmiourgia neou xrwmosomatos
-                //Chromosome child = parents[0].MeritCollumnCrosover( parents[1] );  // diastaurwsh kai dhmiourgia neou xrwmosomatos
+                //Chromosome child = parents[0].MeritCollumnCrosover( parents[1] );         // diastaurwsh kai dhmiourgia neou xrwmosomatos
 
                 child.ColumnInversionMutation( pmut );                                      // metalaksh tou
+                //child.SwapMutation( pmut );                                               // metalaksh tou
                 
-                if ( child.IsFeasible() )                                                  // elenxos sunepeias
+                if ( child.IsFeasible() )                                                   // elenxos sunepeias
                     next_pop.AddChromosome( child );                                        // eisagwgh sth nea genia 
             }
 
@@ -47,7 +48,7 @@ class WHPP
             
             pop = next_pop;
 
-            System.out.print(" " + pop.getNumGeneration());
+            System.out.println(pop.getNumGeneration() + "   " + pop.getBestChromosome().getScore() );
         }
         System.out.println("\n" + pop.getBestChromosome().IsFeasible() + "   " + pop.getBestChromosome().getScore() );
         System.out.println( " " + Arrays.deepToString( pop.getBestChromosome().genes ).replace("],","\n").replace("[","").replace(",","").replace("]","") );
