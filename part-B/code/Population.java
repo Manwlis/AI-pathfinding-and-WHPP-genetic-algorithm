@@ -13,12 +13,14 @@ public class Population {
     private int num_feasible = 0;
 
     private Chromosome best_chromosome;
+    private long sum_score = 0;
     private static int [] population_best_score = new int[ ITER_MAX ];
 
     public int getSize() { return chr_array.size(); }
     public int getNumGeneration() { return num_generation; }
     public int getNumFeasible() { return num_feasible; }
     public Chromosome getBestChromosome() { return best_chromosome; }
+    public long getSumScore() { return sum_score; }
 
     public static void setStartSize( int size ) { START_SIZE = size; }
     public static void setIterMax( int iter ) { ITER_MAX = iter; population_best_score = new int[ ITER_MAX ]; }
@@ -50,6 +52,7 @@ public class Population {
         num_generation = parent_num_gen + 1;
     }
 
+    private int best_score = Integer.MAX_VALUE;
     /**
      * Eisagei ena {@link Chromosome} sthn genia pou thn kalei.
      * @param chromosome pros eisagwgh
@@ -61,7 +64,6 @@ public class Population {
         // mpainoun mono feasible
         num_feasible++;
 
-        int best_score = Integer.MAX_VALUE;
         // briskei pio einai to kalutero chromosoma
         int chromosome_score = chromosome.CalculateScore();
         if ( chromosome_score < best_score )
@@ -69,6 +71,7 @@ public class Population {
             best_score = chromosome_score;
             best_chromosome = chromosome;
         }
+        sum_score += chromosome_score;
     }
 
 
@@ -191,23 +194,6 @@ public class Population {
         // ekane maximum epanalhpseis
         if ( num_generation == ITER_MAX )
             return true;
-
-        // population_best_score[ num_generation ] = best_chromosome.getScore();
-        // if ( num_generation >= ITER_MAX / 10 )
-        // {
-        //     int old_score = population_best_score[ num_generation - (ITER_MAX / 10) ];
-        //     // An den exei uparxei sumantikh beltiwsh (>1%) gia to 10% tou algori8mou, exei meinei se topiko akrotato.
-        //     // H deuterh anisothta uparxei gia na apofeigw periptwseis opou to score xeiroterpse kai plhsiase ta palia, enw den isxuei gia ta gurw tou.
-        //     if ( ( old_score - best_chromosome.getScore() < old_score / 500 )
-        //       && ( best_chromosome.getScore() < population_best_score[ num_generation - 1 ] ) )
-        //       {
-        //           int x = old_score - best_chromosome.getScore();
-        //           int y = old_score / 500;
-        //           System.out.println(old_score + "   " +  best_chromosome.getScore() + "   " + x + "   " + y );
-        //             return true;
-        //       }
-        // }
-
 
         return false;
     }

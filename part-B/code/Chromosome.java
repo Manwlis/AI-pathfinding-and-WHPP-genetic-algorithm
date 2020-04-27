@@ -315,7 +315,6 @@ public class Chromosome
                 continue SC7;               
             }
         }
-        // mhpws ta upoloipa na metrane polles fores gia ka8e ergazomeno???
         // ergasia-adeia-ergasia
     SC8:for ( int employee = 0 ; employee < NUM_EMPLOYEES ; employee++ )
             for ( int day = 0 ; day < SCHEDULE_LENGHT - 2 ; day++ )
