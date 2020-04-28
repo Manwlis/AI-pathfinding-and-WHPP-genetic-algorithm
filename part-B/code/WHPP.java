@@ -2,11 +2,11 @@ import java.util.Arrays;
 
 class WHPP
 {
-    final static int pop = 2000;
-    final static int iter_max = 500;
-    final static double psel = 0.04;
-    final static double pcross = 0.6;
-    final static double pmut = 0.05;
+    final static int pop = 1500;
+    final static int iter_max = 1000;
+    final static double psel = 0.022;
+    final static double pcross = 0.5;
+    final static double pmut = 0.028;
 
     public static void main(String[] args)
     {
@@ -36,17 +36,21 @@ class WHPP
 
             while ( next_pop.getSize() < pop.getSize() )
             {
-                Chromosome [] parents = pop.TournamentSelection( psel );                    // epilogh xromosomatwn
-                // Chromosome child = parents[0].RandomColumnCrossing( parents[1] , pcross );  // diastaurwsh kai dhmiourgia neou xrwmosomatos
-                Chromosome child = parents[0].MeritCollumnCrosover( parents[1] );         // diastaurwsh kai dhmiourgia neou xrwmosomatos
+                // epilogh xromosomatwn
+                Chromosome [] parents = pop.TournamentSelection( psel );
 
-                // child.ColumnInversionMutation( pmut );                                      // metalaksh tou
-                child.SwapMutation( pmut );                                               // metalaksh tou
-                
-                if ( child.IsFeasible() )                                                   // elenxos sunepeias
-                    next_pop.AddChromosome( child );                                        // eisagwgh sth nea genia 
+                // diastaurwsh kai dhmiourgia neou xrwmosomatos
+                Chromosome child = parents[0].RandomColumnCrossing( parents[1] , pcross );
+                //Chromosome child = parents[0].MeritCollumnCrosover( parents[1] );         
+
+                // metalaksh tou
+                //child.ColumnInversionMutation( pmut );
+                child.SwapMutation( pmut );
+
+                // elenxos sunepeias kai eisagwgh sth nea genia 
+                if ( child.IsFeasible() )                                                   
+                    next_pop.AddChromosome( child );
             }
-
             if ( next_pop.IsTerminationValid( pop.getBestChromosome().getScore() ) )
                 completed = true;
             
