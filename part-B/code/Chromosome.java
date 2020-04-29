@@ -167,7 +167,6 @@ public class Chromosome
      * Elenxos soft constrains.
      * @return score xromosomatos.
      */
-    @SuppressWarnings("unused")
     public int CalculateScore()
     {
         score = 0;
@@ -187,7 +186,7 @@ public class Chromosome
             if ( weekly_workhours > MAX_WORK_HOURS )
             {
                 score += SOFT_CONSTRAINTS_COST[0];
-                continue;
+                continue SC0;
             }      
         }
         // max sunexomenes hmeres ergasias
@@ -502,6 +501,44 @@ public class Chromosome
             remaining_mutations -= 2; // Ginan 2 gonidia swap.
             if ( remaining_mutations <= 0 )
                 break; // den xreiazetai alla         
+        }
+    }
+
+    
+    /*********************************************************/
+    /********************* Local search. *********************/
+    /*********************************************************/
+
+    // stoxastikh anazhthsh. Antalazei bardies ergazomenwn me tous geitones tous.
+    public void LocalSearch( double psearch )
+    {
+        Random double_generator = new Random();
+        if ( double_generator.nextDouble() > psearch )
+            return;
+
+        int temp_score = CalculateScore();
+
+        for ( int day = 0 ; day < SCHEDULE_LENGHT ; day++)
+        {
+            for ( int employee = 0 ; employee < NUM_EMPLOYEES - 1; employee++ )
+            {
+                for ( int other_employee = employee + 1 ; other_employee < NUM_EMPLOYEES ; other_employee++ )
+                {
+                    int temp = genes[employee][day];
+                    genes[employee][day] = genes[other_employee][day];
+                    genes[other_employee][day] = temp;
+
+                    // h allagh to ekane xeirotero. Revert.
+                    if ( temp_score < CalculateScore() )
+                    {
+                        temp = genes[employee][day];
+                        genes[employee][day] = genes[other_employee][day];
+                        genes[other_employee][day] = temp;
+
+                        score = temp_score;
+                    }
+                }
+            }
         }
     }
 }

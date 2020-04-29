@@ -14,7 +14,6 @@ public class Population {
 
     private Chromosome best_chromosome;
     private long sum_score = 0;
-    private static int [] population_best_score = new int[ ITER_MAX ];
 
     public int getSize() { return chr_array.size(); }
     public int getNumGeneration() { return num_generation; }
@@ -23,7 +22,7 @@ public class Population {
     public long getSumScore() { return sum_score; }
 
     public static void setStartSize( int size ) { START_SIZE = size; }
-    public static void setIterMax( int iter ) { ITER_MAX = iter; population_best_score = new int[ ITER_MAX ]; }
+    public static void setIterMax( int iter ) { ITER_MAX = iter; }
 
     /*********************************************************/
     /******************** Initialization. ********************/
