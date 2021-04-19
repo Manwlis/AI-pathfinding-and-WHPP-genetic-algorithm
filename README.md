@@ -1,4 +1,4 @@
-# PLH417-project-1
+# AI-pathfinding-and-WHPP-genetic-algorithm
  
 Και τα δύο μέρη έχουν υλοποιηθεί σε java με OpenJDK 11.
 
